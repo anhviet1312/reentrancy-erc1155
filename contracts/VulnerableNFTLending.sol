@@ -27,6 +27,7 @@ contract VulnerableNFTLending {
         // require(loans[_nftId].active == false, "Loan already active");
 
         nftContract.safeTransferFrom(msg.sender, address(this), _nftId);
+
         // (bool success, ) = msg.sender.call{value: _loanAmount}("");
         // require(success, "can not send eth");
 
