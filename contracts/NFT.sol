@@ -3,38 +3,46 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 
-
-
-
 contract VulnerableVault is ERC1155 {
 
     struct LockAsset {
-        uint256 fnftId;
+        uint256 quantity;
         uint256 depositAmount;
     }
-   // mapping(uint256 => uint256) public depositAmount;
+
+    mapping(uint256 id => uint256 amount) public records;
     uint256 public fnftId;
+
     constructor() ERC1155("") {}
 
-
-
     // Mint new FNFT
-    function mintFNFT(uint256 quantity, uint256 depositAmount) external payable{
-        uint256 totalDeposit = depositAmount * quantity;
+    function mintFNFT(uint256 quantity, uint256 amount) external payable{
+        uint256 totalDeposit = amount * quantity;
         require(totalDeposit == msg.value, "not equal amount");
-        _mint(msg.sender, ++fnftId, quantity, "");
+        records[fnftId] = amount;
+        _mint(msg.sender, fnftId, quantity, "");
+        ++fnftId;
     }
 
-
-    function depositAdditionalToFNFT(uint256 quantity, uint256 depositAmount) external {
-        safeTransferFrom(msg.sender, address(this), fnftId, 1, "");
+    function depositAdditionalToFNFT(uint256 targetFnftId, uint256 quantity, uint256 depositAmount) external payable{
+        require(msg.value == quantity * depositAmount, "Not equal value");
+        uint256 currentQuantity = balanceOf(msg.sender, targetFnftId);
+        require(currentQuantity > 0, "record not exist");
+        require(currentQuantity > quantity, "current quantity should be larger than additional quantity");
+        _burn(msg.sender,targetFnftId, quantity);
+        records[fnftId] += depositAmount;
+        _mint(msg.sender, fnftId ,quantity, "");
+        fnft++;
     }
 
-    // function withdraw() external {
-    //     uint256 amount = depositAmount[fnftId];
-    //     depositAmount[fnftId] = 0;
-    //     payable(msg.sender).transfer(amount);
-    // }
+    function withdraw(uint256 targetFnftId) external{        
+        uint256 totalFnft = balanceOf(msg.sender, targetFnftId);
+        uint256 valueWithdraw = records[targetFnftId] * totalFnft;
+        records[targetFnftId] = 0;
+        _burn(msg.sender, targetFnftId, totalFnft);
+        (bool success, _) = address(this).call{value: valueWithdraw}("");
+        require(success, "can not withdraw");
+    }
 
     receive() external payable {}
 }
