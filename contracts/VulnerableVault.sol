@@ -32,7 +32,7 @@ contract VulnerableVault is ERC1155 {
         _burn(msg.sender,targetFnftId, quantity);
         records[fnftId] += depositAmount;
         _mint(msg.sender, fnftId ,quantity, "");
-        fnft++;
+        fnftId++;
     }
 
     function withdraw(uint256 targetFnftId) external{        
@@ -40,7 +40,7 @@ contract VulnerableVault is ERC1155 {
         uint256 valueWithdraw = records[targetFnftId] * totalFnft;
         records[targetFnftId] = 0;
         _burn(msg.sender, targetFnftId, totalFnft);
-        (bool success, _) = address(this).call{value: valueWithdraw}("");
+        (bool success, ) = address(this).call{value: valueWithdraw}("");
         require(success, "can not withdraw");
     }
 
