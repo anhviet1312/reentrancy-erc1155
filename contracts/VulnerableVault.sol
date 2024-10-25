@@ -11,8 +11,7 @@ contract VulnerableVault is ERC1155 {
     }
 
     mapping(uint256 id => uint256 amount) public records;
-    uint256 public fnftId;
-
+    uint256 public fnftId = 1;
     constructor() ERC1155("") {}
 
     // Mint new FNFT
@@ -29,10 +28,10 @@ contract VulnerableVault is ERC1155 {
         uint256 currentQuantity = balanceOf(msg.sender, targetFnftId);
         require(currentQuantity > 0, "record not exist");
         require(currentQuantity > quantity, "current quantity should be larger than additional quantity");
-        _burn(msg.sender,targetFnftId, quantity);
-        records[fnftId] += depositAmount;
-        _mint(msg.sender, fnftId ,quantity, "");
-        fnftId++;
+        _burn(msg.sender, targetFnftId, quantity);
+        records[fnftId] = records[targetFnftId] + depositAmount;
+        uint256 newId = fnftId++;
+        _mint(msg.sender, newId, quantity, "");
     }
 
     function withdraw(uint256 targetFnftId) external{        
